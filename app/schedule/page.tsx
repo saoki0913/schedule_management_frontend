@@ -18,7 +18,7 @@ export default function SchedulePage() {
   const [users, setUsers] = useState<User[]>([{ email: "" }]);
 
   // 取得した候補リストを表示するためのステート
-  const [candidates, setCandidates] = useState<string[]>([]);
+  const [candidates, setCandidates] = useState<string[][]>([]);
 
   // 参加者追加
   const handleAddUser = () => {
@@ -59,7 +59,7 @@ export default function SchedulePage() {
 
     try {
       // バックエンドのエンドポイントURL
-      const res = await fetch("https://func-sche.azurewebsites.net/get_availability", {
+      const res = await fetch("http://localhost:7071/get_availability", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

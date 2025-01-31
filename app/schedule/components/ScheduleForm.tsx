@@ -116,13 +116,16 @@ export default function ScheduleForm(props: ScheduleFormProps) {
         {/* 面談時間 */}
         <div className="items-end p-3 rounded">
           <label className="block mb-1 font-semibold text-xl">面談時間</label>
-          <input
-            type="number"
+          <select
             value={durationMinutes}
             onChange={(e) => setDurationMinutes(Number(e.target.value))}
             className="border p-3 bg-rose-100"
-            min={5}
-          />
+          >
+            <option value={30}>30</option>
+            <option value={60}>60</option>
+            <option value={90}>90</option>
+            <option value={120}>120</option>
+          </select>
           <span className="pb-3 ml-3">分</span>
         </div>
 
