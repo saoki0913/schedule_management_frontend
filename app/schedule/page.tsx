@@ -59,7 +59,7 @@ export default function SchedulePage() {
 
     try {
       // バックエンドのエンドポイントURL
-      const res = await fetch("http://localhost:7071/get_availability", {
+      const res = await fetch("https://func-sche.azurewebsites.net/get_availability", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
