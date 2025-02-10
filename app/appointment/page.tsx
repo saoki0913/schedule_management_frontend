@@ -90,7 +90,7 @@ export default function SelectSchedulePage() {
     };
 
     try {
-      const response = await fetch("http://localhost:7071/appointment", {
+      const response = await fetch("https://func-sche.azurewebsites.net/appointment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
