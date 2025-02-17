@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import CandidateList from "./components/CandidateList";
 import ScheduleForm from "./components/ScheduleForm";
@@ -20,7 +20,7 @@ export default function SchedulePage() {
   const [users, setUsers] = useState<User[]>([{ email: "" }]);
   // ローディング状態を管理する state
   const [isLoading, setIsLoading] = useState(false);
-  // 取得した候補リストを表示するためのステート
+  // 取得した候補リストを表示するための state
   const [candidates, setCandidates] = useState<string[][]>([]);
 
   // 参加者追加
@@ -62,7 +62,6 @@ export default function SchedulePage() {
 
     setIsLoading(true);
     try {
-      // バックエンドのエンドポイントURL https://func-sche.azurewebsites.net
       const res = await fetch("https://func-sche.azurewebsites.net/get_availability", {
         method: "POST",
         headers: {
@@ -72,77 +71,96 @@ export default function SchedulePage() {
       });
 
       if (!res.ok) {
-        // エラー処理
         console.error("Failed to fetch schedule");
         return;
       }
 
       const data = await res.json();
-      // バックエンドから comon_availability という配列が返ってくる想定
       setCandidates(data.comon_availability || []);
-      } catch (error) {
-        console.error("Error:", error);
-      } finally{
-        // リクエスト完了後はローディング状態を解除
-        setIsLoading(false);
-      }
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-// URL を組み立てる共通関数
-const buildFormUrl = () => {
-  const params = new URLSearchParams();
-  params.set("users", JSON.stringify(users));
-  params.set("candidates", JSON.stringify(candidates));
-  params.set("start_time", startTime); // 例: "10:00"
-  params.set("end_time", endTime);     // 例: "18:00"
-  return `/appointment?${params.toString()}`;
-};
-
-// 「フォーム作成」ボタン押下時の処理
-const handleCreateForm = () => {
-  if (candidates.length === 0) {
-    alert("候補がありません。候補を取得してください。");
-    return;
-  }
-  // 共通関数で URL を生成
-  const url = buildFormUrl();
-
-  // 新しいウィンドウ（例：600x800）で /appointment ページを開く
-  window.open(url, "SelectScheduleForm", "width=600,height=800");
-};
-
-// 「フォーム共有」ボタン押下時の処理
-const handleShareForm = async () => {
-  if (candidates.length === 0) {
-    alert("候補がありません。フォームを作成してください。");
-    return;
-  }
-
-  // 共通関数で URL を生成
-  const shareUrl = window.location.origin + buildFormUrl();
-
-  // Web Share API が利用可能か確認
-  if (navigator.share) {
+  // ★ サーバー側にフォームデータを保存してトークンを取得する関数 ★
+  const storeFormData = async (): Promise<string | null> => {
+    const payload = {
+      start_date: startDate,
+      end_date: endDate,
+      start_time: startTime,
+      end_time: endTime,
+      duration_minutes: durationMinutes,
+      users,
+      candidates,
+    };
     try {
-      await navigator.share({
-        title: "面接スケジュールフォーム",
-        text: "面接のスケジュールを入力するフォームです。",
-        url: shareUrl,
+      const res = await fetch("https://func-sche.azurewebsites.net/storeFormData", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
+      if (!res.ok) {
+        console.error("Failed to store form data");
+        return null;
+      }
+      const data = await res.json();
+      return data.token;
     } catch (error) {
-      console.error("共有エラー:", error);
+      console.error("Error storing form data:", error);
+      return null;
     }
-  } else {
-    // Web Share APIが利用できない場合はURLをクリップボードにコピー
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      alert("共有リンクをクリップボードにコピーしました！");
-    } catch (error) {
-      console.error("クリップボードへのコピーに失敗しました:", error);
-    }
-  }
-};
+  };
 
+  // ★ 「フォーム作成」ボタン押下時の処理 ★
+  const handleCreateForm = async () => {
+    if (candidates.length === 0) {
+      alert("候補がありません。候補を取得してください。");
+      return;
+    }
+    const token = await storeFormData();
+    if (!token) {
+      alert("フォームの作成に失敗しました。再度お試しください。");
+      return;
+    }
+    const url = `/appointment?token=${encodeURIComponent(token)}`;
+    window.open(url, "SelectScheduleForm", "width=600,height=800");
+  };
+
+  // ★ 「フォーム共有」ボタン押下時の処理 ★
+  const handleShareForm = async () => {
+    if (candidates.length === 0) {
+      alert("候補がありません。フォームを作成してください。");
+      return;
+    }
+    const token = await storeFormData();
+    if (!token) {
+      alert("フォームの共有に失敗しました。再度お試しください。");
+      return;
+    }
+    const shareUrl = window.location.origin + `/appointment?token=${encodeURIComponent(token)}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "面接スケジュールフォーム",
+          text: "面接のスケジュールを入力するフォームです。",
+          url: shareUrl,
+        });
+      } catch (error) {
+        console.error("共有エラー:", error);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        alert("共有リンクをクリップボードにコピーしました！");
+      } catch (error) {
+        console.error("クリップボードへのコピーに失敗しました:", error);
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -188,14 +206,14 @@ const handleShareForm = async () => {
           {/* フォーム作成ボタン */}
           <button
             onClick={handleCreateForm}
-            className="mt-4 mr-4 nline-block bg-gray-500 text-white px-4 py-2 rounded"
+            className="mt-4 mr-4 inline-block bg-gray-500 text-white px-4 py-2 rounded"
           >
             フォーム作成
           </button>
           {/* フォーム共有ボタン */}
           <button
             onClick={handleShareForm}
-            className="nline-block bg-gray-500 text-white px-4 py-2 rounded"
+            className="inline-block bg-gray-500 text-white px-4 py-2 rounded"
           >
             フォーム共有
           </button>

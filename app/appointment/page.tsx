@@ -5,44 +5,38 @@ import { parseISO, format } from "date-fns";
 import { Calendar, Clock, Check } from "lucide-react";
 
 export default function SelectSchedulePage() {
-  // クエリパラメータから取得するので、初期値は空の配列・文字列にしておく
+  // 初期値は空の配列・文字列にしておく
   const [candidates, setCandidates] = useState<string[][]>([]);
   const [users, setUsers] = useState<{ email: string }[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<string>("");
 
-  // クエリパラメータから受け取る開始時刻・終了時刻（フィルタ条件）
+  // 開始・終了時刻（フィルタ条件）の state
   const [minTime, setMinTime] = useState("10:00");
   const [maxTime, setMaxTime] = useState("18:00");
 
-  // クエリパラメータからデータを取得
+  // URL に token があればサーバーからフォームデータを復元する
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-
-    // 候補リストの取得
-    const candidatesParam = searchParams.get("candidates");
-    if (candidatesParam) {
-      try {
-        setCandidates(JSON.parse(candidatesParam));
-      } catch (err) {
-        console.error("Error parsing candidates", err);
-      }
+    const token = searchParams.get("token");
+    if (token) {
+      fetch(`https://func-sche.azurewebsites.net/retrieveFormData?token=${encodeURIComponent(token)}`)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("Failed to retrieve form data");
+          }
+          return res.json();
+        })
+        .then((data) => {
+          // 復元するデータの例：{ users, candidates, start_time, end_time }
+          if (data.users) setUsers(data.users);
+          if (data.candidates) setCandidates(data.candidates);
+          if (data.start_time) setMinTime(data.start_time);
+          if (data.end_time) setMaxTime(data.end_time);
+        })
+        .catch((error) => {
+          console.error("Error retrieving form data:", error);
+        });
     }
-
-    // ユーザー情報の取得
-    const usersParam = searchParams.get("users");
-    if (usersParam) {
-      try {
-        setUsers(JSON.parse(usersParam));
-      } catch (err) {
-        console.error("Error parsing users", err);
-      }
-    }
-
-    // 開始・終了時刻の取得（なければデフォルト値）
-    const st = searchParams.get("start_time");
-    const et = searchParams.get("end_time");
-    if (st) setMinTime(st);
-    if (et) setMaxTime(et);
   }, []);
 
   // ISO 文字列の日付部分を "yyyy/MM/dd" 形式に変換
@@ -67,16 +61,15 @@ export default function SelectSchedulePage() {
     }
   };
 
-  // フィルタリング条件：クエリから受け取った時刻（例：10:00〜18:00）の範囲内の候補のみ表示
+  // フィルタリング条件：受け取った時刻範囲内の候補のみ表示
   const filteredCandidates = candidates.filter((candidate) => {
     if (candidate.length !== 2) return false;
-    // ISO 文字列から "HH:mm" 部分を抽出（例："2025-02-03T10:30:00" → "10:30"）
     const candidateStart = candidate[0].substring(11, 16);
     const candidateEnd = candidate[1].substring(11, 16);
     return candidateStart >= minTime && candidateEnd <= maxTime;
   });
 
-  // バックエンドへ選択された候補情報を送信し、Outlook 登録を依頼する
+  // バックエンドへ選択候補を送信して予定登録を依頼する
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCandidate) {
@@ -92,16 +85,12 @@ export default function SelectSchedulePage() {
     try {
       const response = await fetch("https://func-sche.azurewebsites.net/appointment", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       if (!response.ok) {
         throw new Error("Failed to schedule appointment.");
       }
-
       const data = await response.json();
       console.log("Response from backend:", data);
       alert(data.message);
@@ -114,21 +103,19 @@ export default function SelectSchedulePage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-8">
       <div className="w-full max-w-3xl px-4">
-        {/* カード風のコンテナ */}
+        {/* カード風コンテナ */}
         <div className="bg-white shadow rounded-lg p-8">
-          {/* ヘッダー部分 */}
+          {/* ヘッダー */}
           <div className="mb-8 text-center">
             <h1 className="text-4xl font-bold tracking-tight">面接日程選択</h1>
             <p className="mt-2 text-gray-600 text-lg">
               以下の候補から希望する面接日程を選択してください。
             </p>
           </div>
-          {/* フォーム部分 */}
+          {/* フォーム */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-6">
-              {/* フィルタリング済み候補の表示 */}
               {filteredCandidates.map((candidate, index) => {
-                // 各候補は [開始日時, 終了日時] の配列
                 const candidateValue = candidate.join(", ");
                 const isSelected = selectedCandidate === candidateValue;
                 const candidateDate = formatDatePart(candidate[0]);
