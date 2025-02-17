@@ -10,10 +10,12 @@ interface User {
 }
 
 export default function SchedulePage() {
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
+  // 現在の日付を "YYYY-MM-DD" 形式で取得
+  const today = new Date().toISOString().split("T")[0];
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("18:00");
   const [durationMinutes, setDurationMinutes] = useState(30);
   const [users, setUsers] = useState<User[]>([{ email: "" }]);
 
