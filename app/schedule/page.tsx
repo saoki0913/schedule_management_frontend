@@ -18,7 +18,8 @@ export default function SchedulePage() {
   const [endTime, setEndTime] = useState("18:00");
   const [durationMinutes, setDurationMinutes] = useState(30);
   const [users, setUsers] = useState<User[]>([{ email: "" }]);
-
+  // ローディング状態を管理する state
+  const [isLoading, setIsLoading] = useState(false);
   // 取得した候補リストを表示するためのステート
   const [candidates, setCandidates] = useState<string[][]>([]);
 
@@ -59,9 +60,10 @@ export default function SchedulePage() {
       users: validUsers,
     };
 
+    setIsLoading(true);
     try {
       // バックエンドのエンドポイントURL https://func-sche.azurewebsites.net
-      const res = await fetch("https://func-sche.azurewebsites.net/get_availability", {
+      const res = await fetch("http://localhost:7071/get_availability", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -80,6 +82,9 @@ export default function SchedulePage() {
       setCandidates(data.comon_availability || []);
       } catch (error) {
         console.error("Error:", error);
+      } finally{
+        // リクエスト完了後はローディング状態を解除
+        setIsLoading(false);
       }
   };
 
@@ -170,7 +175,6 @@ const handleShareForm = async () => {
             handleChangeUserEmail={handleChangeUserEmail}
             handleSubmit={handleSubmit}
           />
-
         </div>
         {/* 右カラム */}
         <div>
@@ -179,6 +183,7 @@ const handleShareForm = async () => {
             candidates={candidates}
             minTime={startTime}
             maxTime={endTime}
+            isLoading={isLoading}
           />
           {/* フォーム作成ボタン */}
           <button
