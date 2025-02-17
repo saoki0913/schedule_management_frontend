@@ -58,7 +58,7 @@ export default function SchedulePage() {
     };
 
     try {
-      // バックエンドのエンドポイントURL
+      // バックエンドのエンドポイントURL https://func-sche.azurewebsites.net
       const res = await fetch("https://func-sche.azurewebsites.net/get_availability", {
         method: "POST",
         headers: {
@@ -81,55 +81,61 @@ export default function SchedulePage() {
       }
   };
 
+// URL を組み立てる共通関数
+const buildFormUrl = () => {
+  const params = new URLSearchParams();
+  params.set("users", JSON.stringify(users));
+  params.set("candidates", JSON.stringify(candidates));
+  params.set("start_time", startTime); // 例: "10:00"
+  params.set("end_time", endTime);     // 例: "18:00"
+  return `/appointment?${params.toString()}`;
+};
+
 // 「フォーム作成」ボタン押下時の処理
 const handleCreateForm = () => {
   if (candidates.length === 0) {
     alert("候補がありません。候補を取得してください。");
     return;
   }
-  // URLSearchParams を使ってクエリパラメータに変換
-  const params = new URLSearchParams();
-  params.set("users", JSON.stringify(users));
-  params.set("candidates", JSON.stringify(candidates));
-  params.set("start_time", startTime); // 例: "10:00"
-  params.set("end_time", endTime);     // 例: "18:00"
-  const url = `/appointment?${params.toString()}`;
+  // 共通関数で URL を生成
+  const url = buildFormUrl();
 
   // 新しいウィンドウ（例：600x800）で /appointment ページを開く
   window.open(url, "SelectScheduleForm", "width=600,height=800");
 };
 
-  // 新たにフォーム共有ボタンの処理を追加
-  const handleShareForm = async () => {
-    if (candidates.length === 0) {
-      alert("候補がありません。フォームを作成してください。");
-      return;
-    }
+// 「フォーム共有」ボタン押下時の処理
+const handleShareForm = async () => {
+  if (candidates.length === 0) {
+    alert("候補がありません。フォームを作成してください。");
+    return;
+  }
 
-    // 共有するフォームのURLを生成
-    const shareUrl = window.location.origin + "/appointment";
+  // 共通関数で URL を生成
+  const shareUrl = window.location.origin + buildFormUrl();
 
-    // Web Share API が利用可能か確認
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "面接スケジュールフォーム",
-          text: "面接のスケジュールを入力するフォームです。",
-          url: shareUrl,
-        });
-      } catch (error) {
-        console.error("共有エラー:", error);
-      }
-    } else {
-      // Web Share APIが利用できない場合はURLをクリップボードにコピー
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        alert("共有リンクをクリップボードにコピーしました！");
-      } catch (error) {
-        console.error("クリップボードへのコピーに失敗しました:", error);
-      }
+  // Web Share API が利用可能か確認
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: "面接スケジュールフォーム",
+        text: "面接のスケジュールを入力するフォームです。",
+        url: shareUrl,
+      });
+    } catch (error) {
+      console.error("共有エラー:", error);
     }
-  };
+  } else {
+    // Web Share APIが利用できない場合はURLをクリップボードにコピー
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      alert("共有リンクをクリップボードにコピーしました！");
+    } catch (error) {
+      console.error("クリップボードへのコピーに失敗しました:", error);
+    }
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
