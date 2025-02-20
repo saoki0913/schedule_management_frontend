@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import CandidateList from "./components/CandidateList";
 import ScheduleForm from "./components/ScheduleForm";
@@ -22,6 +22,9 @@ export default function SchedulePage() {
   const [isLoading, setIsLoading] = useState(false);
   // 取得した候補リストを表示するための state
   const [candidates, setCandidates] = useState<string[][]>([]);
+  // BASE_URL を定義
+  // const BASE_URL = "https://func-sche.azurewebsites.net";
+  const BASE_URL = "http://localhost:7071";
 
   // 参加者追加
   const handleAddUser = () => {
@@ -62,7 +65,7 @@ export default function SchedulePage() {
 
     setIsLoading(true);
     try {
-      const res = await fetch("https://func-sche.azurewebsites.net/get_availability", {
+      const res = await fetch(`${BASE_URL}/get_availability`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -84,7 +87,7 @@ export default function SchedulePage() {
     }
   };
 
-  // ★ サーバー側にフォームデータを保存してトークンを取得する関数 ★
+  // サーバー側にフォームデータを保存してトークンを取得する関数
   const storeFormData = async (): Promise<string | null> => {
     const payload = {
       start_date: startDate,
@@ -96,7 +99,7 @@ export default function SchedulePage() {
       candidates,
     };
     try {
-      const res = await fetch("https://func-sche.azurewebsites.net/storeFormData", {
+      const res = await fetch(`${BASE_URL}/storeFormData`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -115,7 +118,7 @@ export default function SchedulePage() {
     }
   };
 
-  // ★ 「フォーム作成」ボタン押下時の処理 ★
+  //「フォーム作成」ボタン押下時の処理 
   const handleCreateForm = async () => {
     if (candidates.length === 0) {
       alert("候補がありません。候補を取得してください。");
@@ -130,7 +133,7 @@ export default function SchedulePage() {
     window.open(url, "SelectScheduleForm", "width=600,height=800");
   };
 
-  // ★ 「フォーム共有」ボタン押下時の処理 ★
+  // フォーム共有」ボタン押下時の処理 
   const handleShareForm = async () => {
     if (candidates.length === 0) {
       alert("候補がありません。フォームを作成してください。");

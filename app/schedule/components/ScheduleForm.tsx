@@ -147,7 +147,7 @@ export default function ScheduleForm(props: ScheduleFormProps) {
                 <button
                   type="button"
                   onClick={() => handleRemoveUser(index)}
-                  className="bg-red-500 text-white px-2 py-1 rounded"
+                  className="bg-red-500 text-white px-2 py-1 rounded transition-all duration-200 active:scale-95 active:ring-2 active:ring-red-400"
                 >
                   削除
                 </button>
@@ -157,7 +157,7 @@ export default function ScheduleForm(props: ScheduleFormProps) {
           <button
             type="button"
             onClick={handleAddUser}
-            className="bg-rose-300 text-black px-3 py-3 mt-2 mb-5 rounded"
+            className="bg-rose-300 hover:bg-rose-400 text-xl text-black py-3 px-4 mt-2 mb-5 rounded"
           >
             参加者を追加
           </button>
@@ -165,12 +165,12 @@ export default function ScheduleForm(props: ScheduleFormProps) {
 
         {/* フォーム送信ボタン */}
         <div className="md:col-span-2 ml-4">
-          <button
-            type="submit"
-            className="bg-rose-300 text-xl text-black py-3 px-4 mt-2 mb-5 rounded"
-          >
-            空き時間を確認
-          </button>
+        <button
+          type="submit"
+          className="bg-rose-300 hover:bg-rose-400 active:translate-y-0.3 active:scale-95 transition-all duration-200 text-xl text-black py-3 px-4 mt-2 mb-5 rounded"
+        >
+          空き時間を確認
+        </button>
         </div>
       </form>
     </div>
