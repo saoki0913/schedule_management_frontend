@@ -8,6 +8,7 @@ interface CandidateListProps {
   minTime: string;
   maxTime: string;
   isLoading: boolean; // 親から渡されるローディング状態
+  selectedDays: string[]; // 選択された曜日（例: ["月", "火"]）
 }
 
 export default function CandidateList({
@@ -15,6 +16,7 @@ export default function CandidateList({
   minTime,
   maxTime,
   isLoading,
+  selectedDays,
 }: CandidateListProps) {
   // "2025-02-03T10:30:00" → "yyyy/MM/dd HH:mm" のようにフォーマット
   const formatDate = (isoString: string) => {
@@ -39,6 +41,7 @@ export default function CandidateList({
   };
 
   // 候補の時間帯を、minTime 〜 maxTime の範囲内にフィルタリングする
+  //曜日フィルタも適用
   const filteredCandidates = candidates.filter((slotPair) => {
     if (slotPair.length !== 2) return false;
     // 日付部分（最初の10文字）が異なる場合は、日をまたいでいると判断して除外
@@ -50,7 +53,22 @@ export default function CandidateList({
     const candidateEnd = slotPair[1].substring(11, 16);
     // 終了時刻が開始時刻よりも早い場合は、0:00をまたいでいるとみなし除外
     if (candidateEnd < candidateStart) return false;
-    return candidateStart >= minTime && candidateEnd <= maxTime;
+    if (!(candidateStart >= minTime && candidateEnd <= maxTime)) return false;
+    
+    // 選択された曜日がある場合、候補の開始日時の曜日が含まれているかチェック
+    if (selectedDays.length > 0) {
+      try {
+        const date = parseISO(slotPair[0]);
+        const dayIndex = date.getDay(); // 0: 日, 1: 月, ...
+        const dayMap = ["日", "月", "火", "水", "木", "金", "土"];
+        const candidateDay = dayMap[dayIndex];
+        if (!selectedDays.includes(candidateDay)) return false;
+      } catch (err) {
+        console.error("Day parsing error:", err);
+        return false;
+      }
+    }
+    return true;
   });
 
   // 「コピー」ボタン押下時の処理

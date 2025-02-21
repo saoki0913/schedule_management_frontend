@@ -17,14 +17,18 @@ export default function SchedulePage() {
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("18:00");
   const [durationMinutes, setDurationMinutes] = useState(30);
+  // 選択された曜日を保持する state
+  const [selectedDays, setSelectedDays] = useState<string[]>(["月","火","水","木","金"]);
+  // 送信済みかどうかを示す state
+  const [isConfirmed, setIsConfirmed] = useState(false);
   const [users, setUsers] = useState<User[]>([{ email: "" }]);
   // ローディング状態を管理する state
   const [isLoading, setIsLoading] = useState(false);
   // 取得した候補リストを表示するための state
   const [candidates, setCandidates] = useState<string[][]>([]);
   // BASE_URL を定義
-  // const BASE_URL = "https://func-sche.azurewebsites.net";
-  const BASE_URL = "http://localhost:7071";
+  const BASE_URL = "https://func-sche.azurewebsites.net";
+  // const BASE_URL = "http://localhost:7071";
 
   // 参加者追加
   const handleAddUser = () => {
@@ -59,6 +63,7 @@ export default function SchedulePage() {
       end_date: endDate,
       start_time: startTime,
       end_time: endTime,
+      selected_days: selectedDays,
       duration_minutes: durationMinutes,
       users: validUsers,
     };
@@ -90,10 +95,12 @@ export default function SchedulePage() {
   // サーバー側にフォームデータを保存してトークンを取得する関数
   const storeFormData = async (): Promise<string | null> => {
     const payload = {
+      isConfirmed: isConfirmed,
       start_date: startDate,
       end_date: endDate,
       start_time: startTime,
       end_time: endTime,
+      selected_days: selectedDays,
       duration_minutes: durationMinutes,
       users,
       candidates,
@@ -106,6 +113,7 @@ export default function SchedulePage() {
         },
         body: JSON.stringify(payload),
       });
+      console.log(payload);
       if (!res.ok) {
         console.error("Failed to store form data");
         return null;
@@ -188,6 +196,8 @@ export default function SchedulePage() {
             setStartTime={setStartTime}
             endTime={endTime}
             setEndTime={setEndTime}
+            selectedDays={selectedDays}
+            setSelectedDays={setSelectedDays}
             durationMinutes={durationMinutes}
             setDurationMinutes={setDurationMinutes}
             users={users}
@@ -205,6 +215,7 @@ export default function SchedulePage() {
             minTime={startTime}
             maxTime={endTime}
             isLoading={isLoading}
+            selectedDays={selectedDays}
           />
           {/* フォーム作成ボタン */}
           <button

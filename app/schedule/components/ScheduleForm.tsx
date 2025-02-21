@@ -28,6 +28,8 @@ interface ScheduleFormProps {
   setStartTime: (value: string) => void;
   endTime: string;
   setEndTime: (value: string) => void;
+  selectedDays: string[];
+  setSelectedDays: (value: string[]) => void;
   durationMinutes: number;
   setDurationMinutes: (value: number) => void;
   users: User[];
@@ -43,6 +45,7 @@ export default function ScheduleForm(props: ScheduleFormProps) {
     endDate, setEndDate,
     startTime, setStartTime,
     endTime, setEndTime,
+    selectedDays, setSelectedDays,
     durationMinutes, setDurationMinutes,
     users,
     handleAddUser,
@@ -51,6 +54,20 @@ export default function ScheduleForm(props: ScheduleFormProps) {
     handleSubmit,
   } = props;
 
+  // 曜日チェックボックス用の設定（selectedDays は配列）
+  const weekdays = ['月', '火', '水', '木', '金', '土', '日'];
+  const selectedDaysArray = selectedDays;
+
+  const handleDayToggle = (day: string) => {
+    let newSelectedDaysArray: string[];
+    if (selectedDaysArray.includes(day)) {
+      newSelectedDaysArray = selectedDaysArray.filter((d) => d !== day);
+    } else {
+      newSelectedDaysArray = [...selectedDaysArray, day];
+    }
+    setSelectedDays(newSelectedDaysArray);
+  };
+  
   return (
     <div>
       <h1 className="mb-5 font-semibold text-xl">スケジュール調整</h1>
@@ -112,6 +129,30 @@ export default function ScheduleForm(props: ScheduleFormProps) {
                 </option>
               ))}
             </select>
+          </div>
+        </div>
+        {/* 曜日選択 */}
+        <div className="p-4 rounded-lg ">
+          <label className="block mb-1 font-bold text-xl text-gray-800">曜日選択</label>
+          <div className="flex flex-wrap gap-4">
+            {weekdays.map((day) => (
+              <label key={day} className="flex items-center cursor-pointer space-x-2">
+                <input
+                  type="checkbox"
+                  checked={selectedDaysArray.includes(day)}
+                  onChange={() => handleDayToggle(day)}
+                  className="w-5 h-6 accent-rose-500" 
+                />
+                <span className="text-xl font-medium">{day}</span>
+              </label>
+            ))}
+            <button
+              type="button"
+              onClick={() => setSelectedDays([])}
+              className="bg-rose-300 hover:bg-rose-400 text-sm text-black py-1 px-2 rounded"
+              >
+              曜日選択をリセット
+            </button>
           </div>
         </div>
 
