@@ -20,7 +20,7 @@ export default function SchedulePage() {
   // 選択された曜日を保持する state
   const [selectedDays, setSelectedDays] = useState<string[]>(["月","火","水","木","金"]);
   // 送信済みかどうかを示す state
-  const [isConfirmed, setIsConfirmed] = useState(false);
+  const isConfirmed = false;
   const [users, setUsers] = useState<User[]>([{ email: "" }]);
   // ローディング状態を管理する state
   const [isLoading, setIsLoading] = useState(false);

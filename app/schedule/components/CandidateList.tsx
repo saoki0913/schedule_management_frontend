@@ -85,7 +85,7 @@ export default function CandidateList({
       .catch((err) => {
         console.error("コピーに失敗しました:", err);
       });
-  }, [filteredCandidates]);
+  }, [filteredCandidates, formatCandidate]);
 
   return (
     <div className="mt-8">
