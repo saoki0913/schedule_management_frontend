@@ -19,16 +19,6 @@ export default function CandidateList({
   selectedDays,
 }: CandidateListProps) {
   // "2025-02-03T10:30:00" → "yyyy/MM/dd HH:mm" のようにフォーマット
-  const formatDate = (isoString: string) => {
-    try {
-      const date = parseISO(isoString);
-      return format(date, "yyyy/MM/dd HH:mm");
-    } catch (err) {
-      console.error("Date parsing error:", err);
-      return isoString; // パースできなければ元の文字列を返す
-    }
-  };
-
   const formatCandidate = (slotPair: string[]): string => {
     if (slotPair.length !== 2) {
       return slotPair.join(" ");
