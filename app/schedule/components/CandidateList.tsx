@@ -4,7 +4,7 @@ import { parseISO, format } from "date-fns";
 
 interface CandidateListProps {
   // 例: [ ["2025-02-03T10:30:00","2025-02-03T11:00:00"], ... ]
-  candidates: string[][];
+  candidates: string[][]; 
   minTime: string;
   maxTime: string;
   isLoading: boolean; // 親から渡されるローディング状態
@@ -18,17 +18,6 @@ export default function CandidateList({
   isLoading,
   selectedDays,
 }: CandidateListProps) {
-  // ISO文字列から "yyyy/MM/dd HH:mm" 形式で返す関数（フォールバックとして使用）
-  const formatDate = (isoString: string) => {
-    try {
-      const date = parseISO(isoString);
-      return format(date, "yyyy/MM/dd HH:mm");
-    } catch (err) {
-      console.error("Date parsing error:", err);
-      return isoString;
-    }
-  };
-
   // 2つの日時文字列から、日付が同じ場合は "yyyy/MM/dd HH:mm ~ HH:mm"、異なる場合は "yyyy/MM/dd HH:mm ~ yyyy/MM/dd HH:mm" を生成
   const formatCandidate = (slotPair: string[]): string => {
     if (slotPair.length !== 2) {
