@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { parseISO, format } from "date-fns";
 import { Calendar, Clock, Check } from "lucide-react";
 
