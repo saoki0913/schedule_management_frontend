@@ -6,7 +6,6 @@ import { parseISO, format } from "date-fns";
 import { Calendar, Clock, Check } from "lucide-react";
 
 export default function SelectSchedulePage() {
-  const router = useRouter();
   // 各種 state
   const [candidates, setCandidates] = useState<string[][]>([]);
   const [users, setUsers] = useState<{ email: string }[]>([]);
