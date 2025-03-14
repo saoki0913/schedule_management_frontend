@@ -26,6 +26,7 @@ export default function SchedulePage() {
   const [isLoading, setIsLoading] = useState(false);
   // 取得した候補リストを表示するための state
   const [candidates, setCandidates] = useState<string[][]>([]);
+
   // BASE_URL を定義
   const BASE_URL = "https://func-sche.azurewebsites.net";
   // const BASE_URL = "http://localhost:7071";
@@ -126,7 +127,7 @@ export default function SchedulePage() {
     }
   };
 
-  //「フォーム作成」ボタン押下時の処理 
+  //「日程調整画面を表示」ボタン押下時の処理 
   const handleCreateForm = async () => {
     if (candidates.length === 0) {
       alert("候補がありません。候補を取得してください。");
@@ -141,37 +142,42 @@ export default function SchedulePage() {
     window.open(url, "SelectScheduleForm", "width=600,height=800");
   };
 
-  // フォーム共有」ボタン押下時の処理 
-  const handleShareForm = async () => {
-    if (candidates.length === 0) {
-      alert("候補がありません。フォームを作成してください。");
-      return;
-    }
-    const token = await storeFormData();
-    if (!token) {
-      alert("フォームの共有に失敗しました。再度お試しください。");
-      return;
-    }
-    const shareUrl = window.location.origin + `/appointment?token=${encodeURIComponent(token)}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "面接スケジュールフォーム",
-          text: "面接のスケジュールを入力するフォームです。",
-          url: shareUrl,
-        });
-      } catch (error) {
-        console.error("共有エラー:", error);
-      }
-    } else {
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        alert("共有リンクをクリップボードにコピーしました！");
-      } catch (error) {
-        console.error("クリップボードへのコピーに失敗しました:", error);
-      }
-    }
-  };
+// 「リンクを共有」ボタン押下時の処理（メール送信用）
+const handleShareForm = async () => {
+  if (candidates.length === 0) {
+    alert("候補がありません。フォームを作成してください。");
+    return;
+  }
+  const token = await storeFormData();
+  if (!token) {
+    alert("フォームの共有に失敗しました。再度お試しください。");
+    return;
+  }
+  const shareUrl = window.location.origin + `/appointment?token=${encodeURIComponent(token)}`;
+  const subject = "日程調整のお願い";
+  const body = `＜ここにメール相手の性を入力＞様
+
+    インテリジェントフォース採用担当です。
+
+    以下URLよりご都合の良い時間帯を登録いただけますでしょうか。
+
+    ▼面接日程調整URL
+    ${shareUrl}
+
+    ご不明点やご質問がございましたら、お気軽にご連絡くださいませ。
+    お手数をおかけいたしますが、何卒よろしくお願い申し上げます。
+    
+    
+    株式会社インテリジェントフォース`;
+
+
+  // mailto リンクを作成して、既定のメールクライアント（例: Outlook）でメール作成画面を開く
+  const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailtoLink;
+
+};
+
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -222,14 +228,14 @@ export default function SchedulePage() {
             onClick={handleCreateForm}
             className="mt-4 mr-4 inline-block bg-gray-500 text-white px-4 py-2 rounded"
           >
-            フォーム作成
+            日程調整画面を表示
           </button>
           {/* フォーム共有ボタン */}
           <button
             onClick={handleShareForm}
             className="inline-block bg-gray-500 text-white px-4 py-2 rounded"
           >
-            フォーム共有
+            リンクを共有
           </button>
         </div>
       </div>

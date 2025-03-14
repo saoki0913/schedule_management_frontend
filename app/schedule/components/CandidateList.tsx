@@ -18,7 +18,10 @@ export default function CandidateList({
   isLoading,
   selectedDays,
 }: CandidateListProps) {
-  // "2025-02-03T10:30:00" → "yyyy/MM/dd HH:mm" のようにフォーマット
+  // 曜日を日本語で表現するための配列
+  const dayMap = ["日", "月", "火", "水", "木", "金", "土"];
+
+  // "2025-02-03T10:30:00" → "M/d(曜) HH:mm-HH:mm" のようにフォーマットする関数
   const formatCandidate = (slotPair: string[]): string => {
     if (slotPair.length !== 2) {
       return slotPair.join(" ");
@@ -26,16 +29,20 @@ export default function CandidateList({
     try {
       const startDate = parseISO(slotPair[0]);
       const endDate = parseISO(slotPair[1]);
+      
       // 同じ日の場合
-      if (format(startDate, "yyyy/MM/dd") === format(endDate, "yyyy/MM/dd")) {
-        const datePart = format(startDate, "yyyy/MM/dd");
+      if (format(startDate, "M/d") === format(endDate, "M/d")) {
+        const candidateDay = dayMap[startDate.getDay()];
+        const datePart = format(startDate, "M/d") + `(${candidateDay})`;
         const startTime = format(startDate, "HH:mm");
         const endTime = format(endDate, "HH:mm");
-        return `${datePart} ${startTime} ~ ${endTime}`;
+        return `${datePart} ${startTime}-${endTime}`;
       } else {
-        // 日付が異なる場合は、両方のフルフォーマットを表示
-        const startFormatted = format(startDate, "yyyy/MM/dd HH:mm");
-        const endFormatted = format(endDate, "yyyy/MM/dd HH:mm");
+        // 日付が異なる場合は、両方のフルフォーマットに曜日を表示
+        const startDay = dayMap[startDate.getDay()];
+        const endDay = dayMap[endDate.getDay()];
+        const startFormatted = format(startDate, "MM/dd") + `(${startDay}) ` + format(startDate, "HH:mm");
+        const endFormatted = format(endDate, "MM/dd") + `(${endDay}) ` + format(endDate, "HH:mm");
         return `${startFormatted} ~ ${endFormatted}`;
       }
     } catch (err) {
@@ -45,7 +52,7 @@ export default function CandidateList({
   };
 
   // 候補の時間帯を、minTime 〜 maxTime の範囲内にフィルタリングする
-  //曜日フィルタも適用
+  // 曜日フィルタも適用
   const filteredCandidates = candidates.filter((slotPair) => {
     if (slotPair.length !== 2) return false;
     // 日付部分（最初の10文字）が異なる場合は、日をまたいでいると判断して除外
@@ -63,9 +70,7 @@ export default function CandidateList({
     if (selectedDays.length > 0) {
       try {
         const date = parseISO(slotPair[0]);
-        const dayIndex = date.getDay(); // 0: 日, 1: 月, ...
-        const dayMap = ["日", "月", "火", "水", "木", "金", "土"];
-        const candidateDay = dayMap[dayIndex];
+        const candidateDay = dayMap[date.getDay()];
         if (!selectedDays.includes(candidateDay)) return false;
       } catch (err) {
         console.error("Day parsing error:", err);
@@ -75,10 +80,32 @@ export default function CandidateList({
     return true;
   });
 
-  // 「コピー」ボタン押下時の処理
+  // フィルタリング済み候補を開始時刻でソート
+  const sortedCandidates = [...filteredCandidates].sort((a, b) => {
+    return parseISO(a[0]).getTime() - parseISO(b[0]).getTime();
+  });
+
+  // 連続している時間帯をマージする処理
+  const mergedCandidates: string[][] = [];
+  for (const candidate of sortedCandidates) {
+    // 初回はそのまま追加
+    if (mergedCandidates.length === 0) {
+      mergedCandidates.push([...candidate]); // 配列のコピーを追加
+    } else {
+      const lastCandidate = mergedCandidates[mergedCandidates.length - 1];
+      // 最後の候補の終了時刻と現在の候補の開始時刻が一致している場合、マージする
+      if (lastCandidate[1] === candidate[0]) {
+        lastCandidate[1] = candidate[1];
+      } else {
+        mergedCandidates.push([...candidate]);
+      }
+    }
+  }
+
+  // 「コピー」ボタン押下時の処理（マージ済み候補を利用）
   const handleCopy = useCallback(() => {
-    if (filteredCandidates.length === 0) return;
-    const text = filteredCandidates
+    if (mergedCandidates.length === 0) return;
+    const text = mergedCandidates
       .map((pair) => formatCandidate(pair))
       .join("\n");
     navigator.clipboard
@@ -89,12 +116,12 @@ export default function CandidateList({
       .catch((err) => {
         console.error("コピーに失敗しました:", err);
       });
-  }, [filteredCandidates, formatCandidate]);
+  }, [mergedCandidates]);
 
   return (
     <div className="mt-8">
       <h2 className="text-xl font-semibold mb-2">候補日一覧</h2>
-      <div className="relative bg-rose-100 p-8 rounded min-h-[400px]">
+      <div className="relative bg-blue-100 p-8 rounded min-h-[400px]">
         {isLoading ? (
           // ローディング中はサークル型スピナーを表示
           <div className="flex flex-col items-center justify-center min-h-[400px]">
@@ -110,9 +137,9 @@ export default function CandidateList({
             >
               copy
             </button>
-            {filteredCandidates.length > 0 ? (
+            {mergedCandidates.length > 0 ? (
               <ul className="list-inside space-y-1">
-                {filteredCandidates.map((slotPair, index) => (
+                {mergedCandidates.map((slotPair, index) => (
                   <li key={index}>{formatCandidate(slotPair)}</li>
                 ))}
               </ul>

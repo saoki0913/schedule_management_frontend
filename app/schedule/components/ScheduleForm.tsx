@@ -80,7 +80,7 @@ export default function ScheduleForm(props: ScheduleFormProps) {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="border p-3 w-full bg-rose-100"
+              className="border p-3 w-full bg-blue-100"
               required
             />
           </div>
@@ -91,7 +91,7 @@ export default function ScheduleForm(props: ScheduleFormProps) {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="border p-3 w-full bg-rose-100"
+              className="border p-3 w-full bg-blue-100"
               required
             />
           </div>
@@ -104,7 +104,7 @@ export default function ScheduleForm(props: ScheduleFormProps) {
             <select
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
-              className="border p-3 bg-rose-100 w-full"
+              className="border p-3 bg-blue-100 w-full"
               required
             >
               {generateTimeOptions().map((timeStr) => (
@@ -120,7 +120,7 @@ export default function ScheduleForm(props: ScheduleFormProps) {
             <select
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
-              className="border p-3 bg-rose-100 w-full"
+              className="border p-3 bg-blue-100 w-full"
               required
             >
               {generateTimeOptions().map((timeStr) => (
@@ -141,7 +141,7 @@ export default function ScheduleForm(props: ScheduleFormProps) {
                   type="checkbox"
                   checked={selectedDaysArray.includes(day)}
                   onChange={() => handleDayToggle(day)}
-                  className="w-5 h-6 accent-rose-500" 
+                  className="w-5 h-6" 
                 />
                 <span className="text-xl font-medium">{day}</span>
               </label>
@@ -149,7 +149,7 @@ export default function ScheduleForm(props: ScheduleFormProps) {
             <button
               type="button"
               onClick={() => setSelectedDays([])}
-              className="bg-rose-300 hover:bg-rose-400 text-sm text-black py-1 px-2 rounded"
+              className="bg-blue-300 hover:bg-blue-400 text-sm text-black py-1 px-2 rounded"
               >
               曜日選択をリセット
             </button>
@@ -162,7 +162,7 @@ export default function ScheduleForm(props: ScheduleFormProps) {
           <select
             value={durationMinutes}
             onChange={(e) => setDurationMinutes(Number(e.target.value))}
-            className="border p-3 bg-rose-100"
+            className="border p-3 bg-blue-100"
           >
             <option value={30}>30</option>
             <option value={60}>60</option>
@@ -198,7 +198,7 @@ export default function ScheduleForm(props: ScheduleFormProps) {
           <button
             type="button"
             onClick={handleAddUser}
-            className="bg-rose-300 hover:bg-rose-400 text-xl text-black py-3 px-4 mt-2 mb-5 rounded"
+            className="bg-blue-300 hover:bg-blue-400 text-xl text-black py-3 px-4 mt-2 mb-5 rounded"
           >
             参加者を追加
           </button>
@@ -206,12 +206,12 @@ export default function ScheduleForm(props: ScheduleFormProps) {
 
         {/* フォーム送信ボタン */}
         <div className="md:col-span-2 ml-4">
-        <button
-          type="submit"
-          className="bg-rose-300 hover:bg-rose-400 active:translate-y-0.3 active:scale-95 transition-all duration-200 text-xl text-black py-3 px-4 mt-2 mb-5 rounded"
-        >
-          空き時間を確認
-        </button>
+          <button
+            type="submit"
+            className="bg-blue-300 hover:bg-blue-400 active:translate-y-0.3 active:scale-95 transition-all duration-200 text-xl text-black py-3 px-4 mt-2 mb-5 rounded"
+          >
+            候補日一覧を表示
+          </button>
         </div>
       </form>
     </div>
