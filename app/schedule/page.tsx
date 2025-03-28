@@ -18,7 +18,7 @@ export default function SchedulePage() {
   const [endTime, setEndTime] = useState("18:00");
   const [durationMinutes, setDurationMinutes] = useState(30);
   // 選択された曜日を保持する state
-  const [selectedDays, setSelectedDays] = useState<string[]>(["月","火","水","木","金"]);
+  const [selectedDays, setSelectedDays] = useState<string[]>(["月", "火", "水", "木", "金"]);
   // 送信済みかどうかを示す state
   const isConfirmed = false;
   const [users, setUsers] = useState<User[]>([{ email: "" }]);
@@ -142,42 +142,37 @@ export default function SchedulePage() {
     window.open(url, "SelectScheduleForm", "width=600,height=800");
   };
 
-// 「リンクを共有」ボタン押下時の処理（メール送信用）
-const handleShareForm = async () => {
-  if (candidates.length === 0) {
-    alert("候補がありません。フォームを作成してください。");
-    return;
-  }
-  const token = await storeFormData();
-  if (!token) {
-    alert("フォームの共有に失敗しました。再度お試しください。");
-    return;
-  }
-  const shareUrl = window.location.origin + `/appointment?token=${encodeURIComponent(token)}`;
-  const subject = "日程調整のお願い";
-  const body = `＜ここにメール相手の性を入力＞様
+  // 「リンクを共有」ボタン押下時の処理（メール送信用）
+  const handleShareForm = async () => {
+    if (candidates.length === 0) {
+      alert("候補がありません。フォームを作成してください。");
+      return;
+    }
+    const token = await storeFormData();
+    if (!token) {
+      alert("フォームの共有に失敗しました。再度お試しください。");
+      return;
+    }
+    const shareUrl = window.location.origin + `/appointment?token=${encodeURIComponent(token)}`;
 
-    インテリジェントフォース採用担当です。
+    const subject = "【日程調整のお願い】インテリジェントフォース/採用担当";
+    const body = `＜ここにメール相手の性を入力＞様
 
-    以下URLよりご都合の良い時間帯を登録いただけますでしょうか。
+インテリジェントフォース採用担当です。
 
-    ▼面接日程調整URL
-    ${shareUrl}
+以下URLよりご都合の良い時間帯を登録いただけますでしょうか。
 
-    ご不明点やご質問がございましたら、お気軽にご連絡くださいませ。
-    お手数をおかけいたしますが、何卒よろしくお願い申し上げます。
-    
-    
-    株式会社インテリジェントフォース`;
+▼面接日程調整URL
+${shareUrl}
 
+ご不明点やご質問がございましたら、お気軽にご連絡くださいませ。
+お手数をおかけいたしますが、何卒よろしくお願い申し上げます。
 
-  // mailto リンクを作成して、既定のメールクライアント（例: Outlook）でメール作成画面を開く
-  const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  window.location.href = mailtoLink;
+`;
 
-};
-
-
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">

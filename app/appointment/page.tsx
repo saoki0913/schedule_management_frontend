@@ -274,11 +274,10 @@ export default function SelectSchedulePage() {
                     <div
                       key={index}
                       onClick={() => setSelectedCandidate(candidateValue)}
-                      className={`cursor-pointer relative rounded-xl border-2 transition-all duration-300 p-6 flex justify-between items-center transform hover:scale-105 active:scale-95 active:ring-2 active:ring-blue-400 ${
-                        isSelected
-                          ? "border-blue-500 bg-blue-100 shadow-lg"
-                          : "border-gray-300 hover:border-blue-400 hover:shadow-md"
-                      }`}
+                      className={`cursor-pointer relative rounded-xl border-2 transition-all duration-300 p-6 flex justify-between items-center transform hover:scale-105 active:scale-95 active:ring-2 active:ring-blue-400 ${isSelected
+                        ? "border-blue-500 bg-blue-100 shadow-lg"
+                        : "border-gray-300 hover:border-blue-400 hover:shadow-md"
+                        }`}
                     >
                       <div className="flex items-center space-x-6">
                         <div className="flex items-center space-x-2">
@@ -295,9 +294,8 @@ export default function SelectSchedulePage() {
                         </div>
                       </div>
                       <div
-                        className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
-                          isSelected ? "bg-blue-500 text-white" : "bg-gray-300"
-                        }`}
+                        className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${isSelected ? "bg-blue-500 text-white" : "bg-gray-300"
+                          }`}
                       >
                         <Check className={`w-5 h-5 ${isSelected ? "opacity-100" : "opacity-0"}`} />
                       </div>
@@ -307,29 +305,26 @@ export default function SelectSchedulePage() {
                 {/* 「可能な日程がない」選択肢 */}
                 <div
                   onClick={() => setSelectedCandidate("none")}
-                  className={`cursor-pointer relative rounded-xl border-2 transition-all duration-300 p-6 flex justify-between items-center transform hover:scale-105 active:scale-95 active:ring-2 active:ring-red-400 ${
-                    selectedCandidate === "none"
-                      ? "border-red-500 bg-red-100 shadow-lg"
-                      : "border-gray-300 hover:border-red-400 hover:shadow-md"
-                  }`}
+                  className={`cursor-pointer relative rounded-xl border-2 transition-all duration-300 p-6 flex justify-between items-center transform hover:scale-105 active:scale-95 active:ring-2 active:ring-red-400 ${selectedCandidate === "none"
+                    ? "border-red-500 bg-red-100 shadow-lg"
+                    : "border-gray-300 hover:border-red-400 hover:shadow-md"
+                    }`}
                 >
                   <div className="flex items-center space-x-6">
                     <span
-                      className={`text-xl ${
-                        selectedCandidate === "none"
-                          ? "font-semibold text-red-500"
-                          : "text-gray-700"
-                      }`}
+                      className={`text-xl ${selectedCandidate === "none"
+                        ? "font-semibold text-red-500"
+                        : "text-gray-700"
+                        }`}
                     >
                       可能な日程がない
                     </span>
                   </div>
                   <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
-                      selectedCandidate === "none"
-                        ? "bg-red-500 text-white"
-                        : "bg-gray-300"
-                    }`}
+                    className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${selectedCandidate === "none"
+                      ? "bg-red-500 text-white"
+                      : "bg-gray-300"
+                      }`}
                   >
                     <Check className={`w-5 h-5 ${selectedCandidate === "none" ? "opacity-100" : "opacity-0"}`} />
                   </div>
@@ -339,9 +334,8 @@ export default function SelectSchedulePage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full py-4 mt-8 bg-green-500 hover:bg-green-600 transition-all duration-200 text-white text-lg font-semibold rounded-lg shadow-md ${
-                  isLoading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`w-full py-4 mt-8 bg-green-500 hover:bg-green-600 transition-all duration-200 text-white text-lg font-semibold rounded-lg shadow-md ${isLoading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
               >
                 {isLoading ? "処理中..." : "日程を確定する"}
               </button>
