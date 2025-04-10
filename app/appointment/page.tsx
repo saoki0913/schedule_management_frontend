@@ -22,15 +22,15 @@ export default function SelectSchedulePage() {
   const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
 
-  const BASE_URL = "https://func-sche.azurewebsites.net";
-  // const BASE_URL = "http://localhost:7071";
+  // バックエンドAPIのURL
+  const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   // URL の token を使ってフォームデータを復元する
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const token = searchParams.get("token");
     if (token) {
-      fetch(`${BASE_URL}/retrieveFormData?token=${encodeURIComponent(token)}`)
+      fetch(`${apiUrl}/retrieve_form_data?token=${encodeURIComponent(token)}`)
         .then((res) => {
           if (!res.ok) {
             throw new Error("Failed to retrieve form data");
@@ -130,17 +130,29 @@ export default function SelectSchedulePage() {
     e.preventDefault();
     const searchParams = new URLSearchParams(window.location.search);
     const token = searchParams.get("token");
+    console.log("選択された日程", selectedCandidate);
     if (!selectedCandidate) {
       alert("候補を選択してください。");
       return;
     }
-    // 選択された候補をフォーマットする
-    const formattedCandidate = formatCandidate(selectedCandidate.split(", "));
-    const isConfirmedSend = window.confirm(
-      `以下の日程で登録を行います:\n${formattedCandidate}\n\nこちらの内容で間違いないですか？`
-    );
-    if (!isConfirmedSend) {
-      return;
+
+    let formattedCandidate;
+    if (selectedCandidate === "none") {
+      formattedCandidate = selectedCandidate;
+      const isConfirmedSend = window.confirm(
+        "「可能な日程がない」として登録を行います。\n\nこちらの内容で間違いないですか？"
+      );
+      if (!isConfirmedSend) {
+        return;
+      }
+    } else {
+      formattedCandidate = formatCandidate(selectedCandidate.split(", "));
+      const isConfirmedSend = window.confirm(
+        `以下の日程で登録を行います:\n${formattedCandidate}\n\nこちらの内容で間違いないですか？`
+      );
+      if (!isConfirmedSend) {
+        return;
+      }
     }
     setIsLoading(true);
 
@@ -155,7 +167,7 @@ export default function SelectSchedulePage() {
     };
 
     try {
-      const response = await fetch(`${BASE_URL}/appointment`, {
+      const response = await fetch(`${apiUrl}/appointment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -168,7 +180,7 @@ export default function SelectSchedulePage() {
       setConfirmedCandidate(formattedCandidate);
       setIsConfirmed(true);
     } catch (error) {
-      console.error("Error scheduling appointment:", error);
+      console.error("日程の確定に失敗しました。:", error);
       alert("日程の確定に失敗しました。");
     } finally {
       setIsLoading(false);
@@ -190,9 +202,11 @@ export default function SelectSchedulePage() {
               <div className="p-8 bg-gray-200 rounded-lg text-center mb-4">
                 <p className="text-xl font-semibold text-gray-800">確定した日程</p>
                 <p className="text-lg text-gray-700">
-                  {confirmedCandidate
-                    ? confirmedCandidate
-                    : "日程の詳細が取得できませんでした。"}
+                  {confirmedCandidate === "none"
+                    ? "確定した日程はありません。\n再度担当者から連絡します。"
+                    : confirmedCandidate
+                      ? confirmedCandidate
+                      : "日程の詳細が取得できませんでした。"}
                 </p>
               </div>
               <div className="p-8 bg-gray-100 rounded-lg text-center">

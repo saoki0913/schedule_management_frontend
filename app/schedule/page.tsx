@@ -26,10 +26,11 @@ export default function SchedulePage() {
   const [isLoading, setIsLoading] = useState(false);
   // 取得した候補リストを表示するための state
   const [candidates, setCandidates] = useState<string[][]>([]);
+  // 共通する候補日を検索する人数を管理する state
+  const [requiredParticipants, setRequiredParticipants] = useState<number>(1);
 
   // BASE_URL を定義
-  const BASE_URL = "https://func-sche.azurewebsites.net";
-  // const BASE_URL = "http://localhost:7071";
+  const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   // 参加者追加
   const handleAddUser = () => {
@@ -67,25 +68,27 @@ export default function SchedulePage() {
       selected_days: selectedDays,
       duration_minutes: durationMinutes,
       users: validUsers,
+      required_participants: requiredParticipants,
     };
 
     setIsLoading(true);
     try {
-      const res = await fetch(`${BASE_URL}/get_availability`, {
+      const res = await fetch(`${apiUrl}/get_availability`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
       });
-
+      console.log("Request body:", requestBody);
+      console.log("Response:", res);
       if (!res.ok) {
         console.error("Failed to fetch schedule");
         return;
       }
 
       const data = await res.json();
-      setCandidates(data.comon_availability || []);
+      setCandidates(data.common_availability || []);
     } catch (error) {
       console.error("Error:", error);
     } finally {
@@ -107,7 +110,7 @@ export default function SchedulePage() {
       candidates,
     };
     try {
-      const res = await fetch(`${BASE_URL}/storeFormData`, {
+      const res = await fetch(`${apiUrl}/store_form_data`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -206,6 +209,8 @@ ${shareUrl}
             handleRemoveUser={handleRemoveUser}
             handleChangeUserEmail={handleChangeUserEmail}
             handleSubmit={handleSubmit}
+            requiredParticipants={requiredParticipants}
+            setRequiredParticipants={setRequiredParticipants}
           />
         </div>
         {/* 右カラム */}

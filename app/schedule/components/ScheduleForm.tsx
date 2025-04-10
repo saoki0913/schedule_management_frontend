@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 import { FormEventHandler } from "react";
 
 interface User {
@@ -37,6 +37,8 @@ interface ScheduleFormProps {
   handleRemoveUser: (index: number) => void;
   handleChangeUserEmail: (index: number, value: string) => void;
   handleSubmit: FormEventHandler<HTMLFormElement>;
+  requiredParticipants: number;
+  setRequiredParticipants: (value: number) => void;
 }
 
 export default function ScheduleForm(props: ScheduleFormProps) {
@@ -52,6 +54,8 @@ export default function ScheduleForm(props: ScheduleFormProps) {
     handleRemoveUser,
     handleChangeUserEmail,
     handleSubmit,
+    requiredParticipants,
+    setRequiredParticipants,
   } = props;
 
   // 曜日チェックボックス用の設定（selectedDays は配列）
@@ -67,7 +71,7 @@ export default function ScheduleForm(props: ScheduleFormProps) {
     }
     setSelectedDays(newSelectedDaysArray);
   };
-  
+
   return (
     <div>
       <h1 className="mb-5 font-semibold text-xl">スケジュール調整</h1>
@@ -141,7 +145,7 @@ export default function ScheduleForm(props: ScheduleFormProps) {
                   type="checkbox"
                   checked={selectedDaysArray.includes(day)}
                   onChange={() => handleDayToggle(day)}
-                  className="w-5 h-6" 
+                  className="w-5 h-6"
                 />
                 <span className="text-xl font-medium">{day}</span>
               </label>
@@ -150,7 +154,7 @@ export default function ScheduleForm(props: ScheduleFormProps) {
               type="button"
               onClick={() => setSelectedDays([])}
               className="bg-blue-300 hover:bg-blue-400 text-sm text-black py-1 px-2 rounded"
-              >
+            >
               曜日選択をリセット
             </button>
           </div>
@@ -195,13 +199,29 @@ export default function ScheduleForm(props: ScheduleFormProps) {
               )}
             </div>
           ))}
-          <button
-            type="button"
-            onClick={handleAddUser}
-            className="bg-blue-300 hover:bg-blue-400 text-xl text-black py-3 px-4 mt-2 mb-5 rounded"
-          >
-            参加者を追加
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={handleAddUser}
+              className="bg-blue-300 hover:bg-blue-400 text-xl text-black py-3 px-4 rounded whitespace-nowrap"
+            >
+              担当者を追加
+            </button>
+            <div className="flex items-center gap-2">
+              <select
+                value={requiredParticipants}
+                onChange={(e) => setRequiredParticipants(Number(e.target.value))}
+                className="border p-3 bg-blue-100"
+              >
+                <option value={users.length}>全員</option>
+                {Array.from({ length: users.length - 1 }, (_, i) => i + 1).map((num) => (
+                  <option key={num} value={num}>
+                    いずれか{num}名
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* フォーム送信ボタン */}
