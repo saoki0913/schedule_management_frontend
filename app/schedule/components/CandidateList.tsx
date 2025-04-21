@@ -29,7 +29,7 @@ export default function CandidateList({
     try {
       const startDate = parseISO(slotPair[0]);
       const endDate = parseISO(slotPair[1]);
-      
+
       // 同じ日の場合
       if (format(startDate, "M/d") === format(endDate, "M/d")) {
         const candidateDay = dayMap[startDate.getDay()];
@@ -65,7 +65,7 @@ export default function CandidateList({
     // 終了時刻が開始時刻よりも早い場合は、0:00をまたいでいるとみなし除外
     if (candidateEnd < candidateStart) return false;
     if (!(candidateStart >= minTime && candidateEnd <= maxTime)) return false;
-    
+
     // 選択された曜日がある場合、候補の開始日時の曜日が含まれているかチェック
     if (selectedDays.length > 0) {
       try {
@@ -85,21 +85,71 @@ export default function CandidateList({
     return parseISO(a[0]).getTime() - parseISO(b[0]).getTime();
   });
 
-  // 連続している時間帯をマージする処理
+  // 連続している時間帯や重複する時間帯をマージする処理
   const mergedCandidates: string[][] = [];
-  for (const candidate of sortedCandidates) {
-    // 初回はそのまま追加
-    if (mergedCandidates.length === 0) {
-      mergedCandidates.push([...candidate]); // 配列のコピーを追加
-    } else {
-      const lastCandidate = mergedCandidates[mergedCandidates.length - 1];
-      // 最後の候補の終了時刻と現在の候補の開始時刻が一致している場合、マージする
-      if (lastCandidate[1] === candidate[0]) {
-        lastCandidate[1] = candidate[1];
-      } else {
-        mergedCandidates.push([...candidate]);
+
+  if (sortedCandidates.length > 0) {
+    // 同じ日付の時間枠をグループ化
+    const candidatesByDay: Record<string, string[][]> = {};
+
+    // 候補を日付ごとにグループ化
+    sortedCandidates.forEach(candidate => {
+      const dateStr = candidate[0].substring(0, 10); // YYYY-MM-DD部分を取得
+      if (!candidatesByDay[dateStr]) {
+        candidatesByDay[dateStr] = [];
       }
-    }
+      candidatesByDay[dateStr].push(candidate);
+    });
+
+    // 各日付ごとに処理
+    Object.keys(candidatesByDay).forEach(dateStr => {
+      const dayCandidates = candidatesByDay[dateStr];
+
+      // 開始時間でソート
+      dayCandidates.sort((a, b) => {
+        return parseISO(a[0]).getTime() - parseISO(b[0]).getTime();
+      });
+
+      // マージ処理
+      let merged: string[][] = [];
+
+      if (dayCandidates.length > 0) {
+        // 最初の候補で初期化
+        let current = [...dayCandidates[0]];
+
+        for (let i = 1; i < dayCandidates.length; i++) {
+          const candidate = dayCandidates[i];
+
+          const currentStartTime = parseISO(current[0]).getTime();
+          const currentEndTime = parseISO(current[1]).getTime();
+          const candidateStartTime = parseISO(candidate[0]).getTime();
+          const candidateEndTime = parseISO(candidate[1]).getTime();
+
+          // 重複または連続しているか判定
+          if (candidateStartTime <= currentEndTime) {
+            // 重複または連続している場合、終了時間を更新（より遅い方を採用）
+            if (candidateEndTime > currentEndTime) {
+              current[1] = candidate[1];
+            }
+          } else {
+            // 重複も連続もしていない場合、現在のグループを確定して新しいグループを開始
+            merged.push(current);
+            current = [...candidate];
+          }
+        }
+
+        // 最後のグループを追加
+        merged.push(current);
+      }
+
+      // 全体の結果に追加
+      mergedCandidates.push(...merged);
+    });
+
+    // 再度開始時間でソート（日付をまたいでソート）
+    mergedCandidates.sort((a, b) => {
+      return parseISO(a[0]).getTime() - parseISO(b[0]).getTime();
+    });
   }
 
   // 「コピー」ボタン押下時の処理（マージ済み候補を利用）
